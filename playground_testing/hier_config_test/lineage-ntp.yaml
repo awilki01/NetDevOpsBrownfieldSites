@@ -1,0 +1,8 @@
+---
+
+- lineage:
+  - startswith:
+    - ntp
+    - no ntp
+  add_tags: ntp
+

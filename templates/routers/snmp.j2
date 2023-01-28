@@ -1,0 +1,27 @@
+no ip access-list standard management_server
+ip access-list standard management_server
+ permit {{ management_server_ip }}
+snmp-server location {{ city_name }}
+snmp-server community {{ snmp_string }} RO management_server
+snmp-server ifindex persist
+snmp-server host {{ management_server_ip }} version 2c {{ snmp_string }}
+snmp-server enable traps snmp authentication linkdown linkup coldstart warmstart
+snmp-server enable traps ethernet cfm cc mep-up mep-down cross-connect loop config
+snmp-server enable traps ethernet cfm crosscheck mep-missing mep-unknown service-up
+snmp-server enable traps ethernet evc status create delete
+snmp-server enable traps bfd
+snmp-server enable traps bgp
+snmp-server enable traps cef resource-failure peer-state-change peer-fib-state-change inconsistency
+snmp-server enable traps memory bufferpeak
+snmp-server enable traps config-copy
+snmp-server enable traps config
+snmp-server enable traps config-ctid
+snmp-server enable traps entity-ext
+snmp-server enable traps entity
+snmp-server enable traps resource-policy
+snmp-server enable traps cpu threshold
+snmp-server enable traps syslog
+snmp-server enable traps event-manager
+snmp-server enable traps ethernet cfm alarm
+snmp-server enable traps bulkstat collection transfer
+

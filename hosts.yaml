@@ -1,0 +1,39 @@
+---
+
+mci-rtr01:
+  hostname: mci-rtr01.mylab.com
+  groups:
+    - ios_wan_routers
+    - mci
+
+mci-sw01:
+  hostname: mci-sw01.mylab.com
+  groups:
+    - ios_lan_switches
+    - mci
+
+phx-rtr01:
+  hostname: phx-rtr01.mylab.com
+  groups:
+    - ios_wan_routers
+    - phx
+
+phx-sw01:
+  hostname: phx-sw01.mylab.com
+  groups:
+    - ios_lan_switches
+    - phx
+
+flg-rtr01:
+  hostname: flg-rtr01.mylab.com
+  groups:
+    - ios_wan_routers
+    - flg
+
+flg-sw01:
+  hostname: flg-sw01.mylab.com
+  groups:
+    - ios_lan_switches
+    - flg
+
+

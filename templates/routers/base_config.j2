@@ -1,0 +1,18 @@
+service password-encryption
+clock timezone {{ timezone }} {{ timezone_offset }} 0
+no ip domain-lookup
+ip domain-name mylab.com
+file prompt quiet
+username labuser privilege 15 secret password123
+enable secret password123
+no ip http server
+no ip http secure-server
+ip scp server enable
+logging buffered 32768
+{% include "./routers/snmp.j2"%}
+{%- include "syslog.j2" %}
+{% include "ntp.j2" %}
+end
+
+
+
