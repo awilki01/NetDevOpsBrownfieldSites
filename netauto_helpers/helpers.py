@@ -72,8 +72,9 @@ def remediate(task: Task, tag: str, lineage_filename: str) -> Result:
         host=task.host,
     )
 
+
 def save_running_configs(task: Task) -> Result:
-    cfg_path = f"running_configs/"
+    cfg_path = f"./running_configs/"
     filename = f"{cfg_path}{task.host.name}.cfg"
 
     running_config = task.run(
@@ -99,7 +100,7 @@ def save_running_configs(task: Task) -> Result:
 
 
 def render_configs(task: Task) -> Result:
-    template_path = f"templates"
+    template_path = f"./templates"
     if "ios_lan_switches" in task.host.groups:
         template = f"/switches/base_config.j2"
     else:
@@ -127,7 +128,7 @@ def render_configs(task: Task) -> Result:
 
 
 def write_configs(task: Task) -> Result:
-    cfg_path = f"rendered_configs/"
+    cfg_path = f"./rendered_configs/"
     filename = f"{cfg_path}{task.host.name}.cfg"
     content = task.host['rendered_config']
 

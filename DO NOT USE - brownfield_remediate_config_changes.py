@@ -3,13 +3,11 @@
 from termcolor import colored
 from nornir import InitNornir
 from nornir.core.task import Task, Result
-from nornir.core.filter import F
-from nornir_utils.plugins.functions import print_result
-from automation_helpers import save_running_configs, deploy_configs, write_configs, remediate, del_directory
+from netauto_helpers.helpers import save_running_configs, deploy_configs, remediate, del_directory
 
 
 def nornir_workflow(task: Task) -> Result:
-    lineage_filename = "./hier_config_lineage/lineage.yaml"
+    lineage_filename = "hier_config_lineage/lineage.yaml"
     task.run(
         name="Save Running Config to Local File",
         # severity_level=logging.INFO,

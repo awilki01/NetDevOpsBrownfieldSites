@@ -186,3 +186,4 @@ fabric.properties
 
 # Nornir log
 nornir.log
+.pytest_cache

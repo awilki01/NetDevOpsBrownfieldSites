@@ -3,9 +3,8 @@
 from termcolor import colored
 from nornir import InitNornir
 from nornir.core.task import Task, Result
-from nornir.core.filter import F
 from nornir_utils.plugins.functions import print_result
-from automation_helpers import del_directory, save_running_configs, render_configs, write_configs, deploy_configs, remediate
+from netauto_helpers.helpers import *
 
 
 def nornir_workflow(task: Task) -> Result:
@@ -28,7 +27,7 @@ def nornir_workflow(task: Task) -> Result:
     task.run(
         name="Deploy Configs to Devices",
         task=deploy_configs,
-        cfg_path=f"./rendered_configs/",
+        cfg_path=f"rendered_configs/",
     )
 
     # Config remediation steps
@@ -38,7 +37,7 @@ def nornir_workflow(task: Task) -> Result:
         task=save_running_configs,
     )
 
-    lineage_filename = "./hier_config_lineage/lineage.yaml"
+    lineage_filename = "hier_config_lineage/lineage.yaml"
 
     task.run(
         task=remediate,
