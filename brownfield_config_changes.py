@@ -59,7 +59,7 @@ def nornir_workflow(task: Task) -> Result:
 
 def main():
     # Delete contents of directories
-    del_directory(["./remediation_config_changes", "./rendered_configs", "./running_configs"])
+    del_directory_contents(["./remediation_config_changes", "./rendered_configs", "./running_configs"])
 
     nr = InitNornir()
     # Apply inventory filters, if needed. Examples:

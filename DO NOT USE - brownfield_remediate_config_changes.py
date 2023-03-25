@@ -3,7 +3,7 @@
 from termcolor import colored
 from nornir import InitNornir
 from nornir.core.task import Task, Result
-from netauto_helpers.helpers import save_running_configs, deploy_configs, remediate, del_directory
+from netauto_helpers.helpers import save_running_configs, deploy_configs, remediate, del_directory_contents
 
 
 def nornir_workflow(task: Task) -> Result:
@@ -41,7 +41,7 @@ def nornir_workflow(task: Task) -> Result:
 
 def main():
     # Delete contents of ./remediation_config_changes
-    del_directory("./remediation_config_changes")
+    del_directory_contents("./remediation_config_changes")
 
     nr = InitNornir()
     # nr = nr.filter(F(groups__contains="ios_lan_switches"))

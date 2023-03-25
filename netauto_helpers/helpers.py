@@ -16,7 +16,7 @@ from hier_config import Host
 #         self.task = task
 
 
-def del_directory(directory_names: list[str]):
+def del_directory_contents(directory_names: list[str]):
     for name in directory_names:
         for filename in os.listdir(name):
             file_path = os.path.join(name, filename)
