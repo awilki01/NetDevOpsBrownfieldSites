@@ -79,6 +79,7 @@ def main():
 
     print("\n\n")
     # print_result(workflow, severity_level=logging.ERROR)
+    nr.close_connections()
 
 
 if __name__ == "__main__":
