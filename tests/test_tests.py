@@ -7,6 +7,7 @@ from nornir.core.task import Task, Result
 from nornir_utils.plugins.functions import print_result
 from netauto_helpers.helpers import *
 import netauto_helpers
+from brownfield_config_changes import nornir_workflow
 
 DIRECTORIES = ["./remediation_config_changes", "./rendered_configs", "./running_configs"]
 
@@ -40,6 +41,12 @@ class TestAutomationHelpers:
         """ Test to make sure Nornir can be initialized. This will show errors in inventory data files as well."""
         assert type(init_nornir) is nornir.core.Nornir
 
-    # def test_save_running_config_to_local_file(self, init_nornir):
+    def test_automate_brownfield(self, init_nornir):
+        workflow = init_nornir.run(
+            name="Brownfield Config Changes",
+            task=nornir_workflow,
+        )
+        print_result(workflow)
+        print()
 
 
