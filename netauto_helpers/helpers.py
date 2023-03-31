@@ -73,7 +73,7 @@ def remediate(task: Task, tag: str, lineage_filename: str) -> Result:
     )
 
 
-def save_running_configs(task: Task) -> Result:
+def save_running_config(task: Task) -> Result:
     cfg_path = f"./running_configs/"
     filename = f"{cfg_path}{task.host.name}.cfg"
 
@@ -127,7 +127,7 @@ def render_configs(task: Task) -> Result:
     )
 
 
-def write_configs(task: Task) -> Result:
+def write_rendered_config(task: Task) -> Result:
     cfg_path = f"./rendered_configs/"
     filename = f"{cfg_path}{task.host.name}.cfg"
     content = task.host['rendered_config']
@@ -144,7 +144,7 @@ def write_configs(task: Task) -> Result:
     )
 
 
-def deploy_configs(task: Task, cfg_path: str) -> Result:
+def deploy_config(task: Task, cfg_path: str) -> Result:
     config_file = f"{cfg_path}{task.host.name}.cfg"
 
     # If file is empty do not apply. NAPALM errors out on blank files.
