@@ -12,6 +12,18 @@ mci-sw01:
     - ios_lan_switches
     - mci
 
+lab-rtr01:
+  hostname: lab-rtr01.mylab.com
+  groups:
+    - ios_wan_routers
+    - lab
+
+lab-sw01:
+  hostname: lab-rtr01.mylab.com
+  groups:
+    - ios_lan_switches
+    - lab
+
 phx-rtr01:
   hostname: phx-rtr01.mylab.com
   groups:

@@ -3,13 +3,11 @@
 from termcolor import colored
 from nornir import InitNornir
 from nornir.core.task import Task, Result
-from nornir.core.filter import F
-from nornir_utils.plugins.functions import print_result
-from automation_helpers import save_running_configs, deploy_configs, write_configs, remediate, del_directory
+from netauto_helpers.helpers import save_running_configs, deploy_configs, remediate, del_directory_contents
 
 
 def nornir_workflow(task: Task) -> Result:
-    lineage_filename = "./hier_config_lineage/lineage.yaml"
+    lineage_filename = "hier_config_lineage/lineage.yaml"
     task.run(
         name="Save Running Config to Local File",
         # severity_level=logging.INFO,
@@ -43,7 +41,7 @@ def nornir_workflow(task: Task) -> Result:
 
 def main():
     # Delete contents of ./remediation_config_changes
-    del_directory("./remediation_config_changes")
+    del_directory_contents("./remediation_config_changes")
 
     nr = InitNornir()
     # nr = nr.filter(F(groups__contains="ios_lan_switches"))
