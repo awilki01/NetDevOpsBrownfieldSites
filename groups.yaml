@@ -14,11 +14,11 @@ lab:
   data:
     city_name: Kansas City
     ntp_servers:
-      - 240.1.1.1
-      - 240.1.1.2
+      - 24.1.1.1
+      - 24.1.1.2
     syslog_servers:
-      - 241.1.1.1
-      - 241.1.1.2
+      - 24.1.1.1
+      - 24.1.1.2
     timezone: CST
     timezone_offset: -6
 

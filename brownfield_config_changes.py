@@ -65,6 +65,7 @@ def main():
     # Apply inventory filters, if needed. Examples:
     # nr = nr.filter(F(groups__contains="ios_lan_switches"))
     # nr = nr.filter(name="flg-rtr01")
+    nr = nr.filter(F(groups__contains="lab"))
 
     workflow = nr.run(
         name="Brownfield Config Changes",
