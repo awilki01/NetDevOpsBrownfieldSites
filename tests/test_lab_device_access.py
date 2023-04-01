@@ -1,6 +1,5 @@
 import pytest
 import socket
-import netmiko
 from netmiko import ConnectHandler
 
 lab_device_dict = {

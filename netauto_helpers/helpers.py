@@ -158,20 +158,76 @@ def deploy_config(task: Task, cfg_path: str) -> Result:
         host=task.host,
     )
 
-# def deploy_configs(task: Task) -> Result:
-#     filename = f"configlets/{task.host.name}.txt"
-#     with open(filename, "r") as f:
-#         cfg = f.read()
-#
-#     task.run(
-#         task=napalm_configure,
-#         configuration=cfg,
-#         replace=True,
-#     )
-#
-#     return Result(
-#         host=task.host,
-#     )
+
+def nornir_save_running_config_to_file(task: Task) -> Result:
+    print(f"{task.host.name}---------------------------------")
+    task.run(
+        name="Save Running Config to Local File",
+        task=save_running_config,
+    )
+    return Result(
+        host=task.host,
+    )
+
+
+def nornir_render_config(task: Task) -> Result:
+    print(f"{task.host.name}---------------------------------")
+    task.run(
+        name="Render Device Configuration to Local File",
+        task=render_configs,
+    )
+    return Result(
+        host=task.host,
+    )
+
+
+def nornir_write_rendered_config_to_file(task: Task) -> Result:
+    print(f"{task.host.name}---------------------------------")
+    task.run(
+        name="Write Rendered Config to File",
+        task=write_rendered_config,
+    )
+    return Result(
+        host=task.host,
+    )
+
+
+def nornir_deploy_config(task: Task) -> Result:
+    print(f"{task.host.name}---------------------------------")
+    task.run(
+        name="Deploy Config to Devices",
+        task=deploy_config,
+        cfg_path=f"rendered_configs/",
+    )
+    return Result(
+        host=task.host,
+    )
+
+
+def nornir_render_remediation_config(task: Task) -> Result:
+    print(f"{task.host.name}---------------------------------")
+    lineage_filename = "hier_config_lineage/lineage.yaml"
+    task.run(
+        task=remediate,
+        name="Config Remediation Generation for Safe Services",
+        tag="safe_services",
+        lineage_filename=lineage_filename,
+    )
+    return Result(
+        host=task.host,
+    )
+
+
+def nornir_deploy_remediation_config(task: Task) -> Result:
+    print(f"{task.host.name}---------------------------------")
+    task.run(
+        name="Deploy Remediation Configs to Devices",
+        task=deploy_config,
+        cfg_path=f"./remediation_config_changes/",
+    )
+    return Result(
+        host=task.host,
+    )
 
 
 
