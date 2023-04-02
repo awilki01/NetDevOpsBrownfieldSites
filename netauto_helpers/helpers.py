@@ -1,4 +1,4 @@
-import os, shutil
+import os, shutil, hashlib
 from pathlib import Path
 from nornir import InitNornir
 from nornir.core.filter import F
@@ -100,6 +100,7 @@ def save_running_config(task: Task) -> Result:
 
 
 def render_configs(task: Task) -> Result:
+    """ This function places rendered config in host's data within the Nornir inventory. It does not save it to file."""
     template_path = f"./templates"
     if "ios_lan_switches" in task.host.groups:
         template = f"/switches/base_config.j2"
@@ -142,6 +143,19 @@ def write_rendered_config(task: Task) -> Result:
     return Result(
         host=task.host
     )
+
+
+def stamp_and_hash_config(task: Task, cfg_path: str) -> Result:
+    sha256 = hashlib.sha256()
+    config_file = f"{cfg_path}{task.host.name}.cfg"
+
+    #TODO: add loopback1000 to config file with description text of SHA256 hash of file (after loopback is added)
+
+    with open(config_file, 'rb') as file:
+        data = file.read()
+        sha256.update(data)
+
+    print(sha256.hexdigest())
 
 
 def deploy_config(task: Task, cfg_path: str) -> Result:

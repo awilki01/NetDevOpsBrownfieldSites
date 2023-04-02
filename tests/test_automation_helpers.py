@@ -24,7 +24,7 @@ class TestAutomationHelpers:
                 temp_file.close()
 
     @staticmethod
-    def check_file_name(path, name):
+    def check_file_name(path: str, name: str) -> bool:
         for file in os.listdir(path):
             if os.path.isfile(os.path.join(path, file)):
                 if name in file:
@@ -65,7 +65,7 @@ class TestAutomationHelpers:
             else:
                 print(f"File NOT in directory for device: {key}")
 
-    def test_ensure_running_config_file_exists_and_is_proper(self, nr):
+    def test_ensure_running_config_file_exists_and_is_valid(self, nr):
         """ Test to see if running config file exists and is indeed an actual config by checking for a few config lines.
             It tests a common config line at top and bottom of configs for both routers and switches. """
         device_list = []
@@ -74,10 +74,53 @@ class TestAutomationHelpers:
         for device in device_list:
             with open(f"./running_configs/{device}.cfg", 'r') as file:
                 output = file.read()
-                if 'boot-start-marker' in output and 'line con 0' in output:
-                    assert True
-                else:
-                    assert False
+                assert ('boot-start-marker' in output and 'line con 0' in output)
+
+    def test_ensure_configs_are_properly_rendered(self, nr):
+        """ Test to ensure configs are properly rendered. """
+        nr.run(
+            task=nornir_render_config,
+        )
+        for key in nr.inventory.hosts.keys():
+            rendered_config = nr.inventory.hosts[key].data['rendered_config']
+            print(rendered_config)
+            assert ('-BEGIN RENDER-' in rendered_config and '-END RENDER-' in rendered_config)
+
+    def test_render_configs_to_file(self, nr):
+        """ Test that rendered configs are saved to file. """
+        nornir_run = nr.run(
+            task=nornir_write_rendered_config_to_file,
+        )
+        path = "./rendered_configs"
+        for key in nornir_run.keys():
+            assert self.check_file_name(path, key)
+            # Print output with pytest -s option for debugging
+            if self.check_file_name(path, key):
+                print(f"File in directory for device: {key}")
+            else:
+                print(f"File NOT in directory for device: {key}")
+
+    def test_ensure_rendered_config_file_exists_and_is_valid(self, nr):
+        """ Test to see if rendered config file exists and is indeed an actual config by checking for a few config
+            lines. It tests a common config line at top and bottom of rendered configs for both routers and switches.
+        """
+        device_list = []
+        for key in nr.inventory.hosts.keys():
+            device_list.append(key)
+        for device in device_list:
+            with open(f"./rendered_configs/{device}.cfg", 'r') as file:
+                output = file.read()
+                assert ('-BEGIN RENDER-' in output and '-END RENDER-' in output)
+
+    def test_deploy_rendered_config(self, nr):
+        result = nr.run(
+            task=nornir_deploy_config,
+        )
+        print_result(result)
+
+
+
+
 
 
 

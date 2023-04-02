@@ -1,7 +1,8 @@
+!---------------------------------BEGIN RENDER---------------------------------
 service password-encryption
 clock timezone {{ timezone }} {{ timezone_offset }} 0
 no ip domain-lookup
-ip domain-name mylab.com
+ip domain name mylab.com
 file prompt quiet
 username labuser privilege 15 secret password123
 enable secret password123
@@ -13,6 +14,6 @@ logging buffered 32768
 {%- include "syslog.j2" %}
 {% include "ntp.j2" %}
 end
-
+!----------------------------------END RENDER----------------------------------
 
 

@@ -1,3 +1,4 @@
+!---------------------------------BEGIN RENDER---------------------------------
 service password-encryption
 clock timezone {{ timezone }} {{ timezone_offset }} 0
 no ip domain-lookup
@@ -15,5 +16,6 @@ logging buffered 32768
 {% include "ntp.j2" %}
 
 end
+!----------------------------------END RENDER----------------------------------
 
 
