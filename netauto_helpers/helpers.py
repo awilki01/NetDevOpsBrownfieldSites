@@ -1,4 +1,4 @@
-import os, shutil, hashlib
+import os, shutil, hashlib, uuid
 from pathlib import Path
 from nornir import InitNornir
 from nornir.core.filter import F
@@ -35,28 +35,28 @@ def remediate(task: Task, tag: str, lineage_filename: str) -> Result:
     host.load_running_config_from_file(f"./running_configs/{task.host.name}.cfg")
     host.load_generated_config_from_file(f"./rendered_configs/{task.host.name}.cfg")
 
-    print(f"{task.host.name}")
-    print(host.remediation_config_filtered_text(include_tags={tag}, exclude_tags={}))
+    # print(f"{task.host.name}")
+    # print(host.remediation_config_filtered_text(include_tags={tag}, exclude_tags={}))
     changes = host.remediation_config_filtered_text(include_tags={tag}, exclude_tags={})
-    print(task.host.name)
+    # print(task.host.name)
 
     if changes == "":
         print("No changes")
 
-    print("---------------------------")
-    print(changes)
-    print("---------------------------")
+    # print("---------------------------")
+    # print(changes)
+    # print("---------------------------")
     cfg_change_path = f"./remediation_config_changes/"
     filename = f"{cfg_change_path}{task.host.name}.cfg"
 
     # Check if file exists. If it does, then append a newline to it so appended results
     # are added correctly. If the file does not exist, create it.
     if os.path.isfile(filename):
-        print("FILE EXISTS")
+        # print("FILE EXISTS")
         with open(filename, "a") as file:
             file.write("\n")
     else:
-        print("NO FILE EXISTS")
+        # print("NO FILE EXISTS")
         Path(filename).touch()
 
     if changes != "":
@@ -107,10 +107,13 @@ def render_configs(task: Task) -> Result:
     else:
         template = f"/routers/base_config.j2"
 
+    uuid_str = str(uuid.uuid4())
+
     result = task.run(
         task=template_file,
         template=template,
         path=template_path,
+        uuid=uuid_str,
         **task.host,
         # **task.host unpacks the host name so you don't have to do "host.interfaces.items()"
         # in jinja template. It allows you to just do "interfaces.items()".
@@ -122,6 +125,10 @@ def render_configs(task: Task) -> Result:
     # This adds information to the host data field. We are storing rendered config in
     # data field of host object
     task.host['rendered_config'] = rendered_config
+    # The uuid value is compared in tests to ensure proper config was pushed. This is done later by comparing
+    # the Loopback1000 description text on the device running-config and the uuid value stored in the nornir
+    # inventory object.
+    task.host['uuid_str'] = uuid_str
 
     return Result(
         host=task.host,
@@ -143,19 +150,6 @@ def write_rendered_config(task: Task) -> Result:
     return Result(
         host=task.host
     )
-
-
-def stamp_and_hash_config(task: Task, cfg_path: str) -> Result:
-    sha256 = hashlib.sha256()
-    config_file = f"{cfg_path}{task.host.name}.cfg"
-
-    #TODO: add loopback1000 to config file with description text of SHA256 hash of file (after loopback is added)
-
-    with open(config_file, 'rb') as file:
-        data = file.read()
-        sha256.update(data)
-
-    print(sha256.hexdigest())
 
 
 def deploy_config(task: Task, cfg_path: str) -> Result:

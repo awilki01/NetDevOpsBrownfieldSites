@@ -5,6 +5,7 @@ from termcolor import colored
 from nornir import InitNornir
 from nornir.core.task import Task, Result
 from nornir_utils.plugins.functions import print_result
+from nornir_napalm.plugins.tasks import napalm_get
 from netauto_helpers.helpers import *
 import netauto_helpers
 
@@ -88,11 +89,12 @@ class TestAutomationHelpers:
 
     def test_render_configs_to_file(self, nr):
         """ Test that rendered configs are saved to file. """
-        nornir_run = nr.run(
+        result = nr.run(
             task=nornir_write_rendered_config_to_file,
         )
         path = "./rendered_configs"
-        for key in nornir_run.keys():
+        # TODO: iterate over nr.inventory.hosts.keys()?
+        for key in result.keys():
             assert self.check_file_name(path, key)
             # Print output with pytest -s option for debugging
             if self.check_file_name(path, key):
@@ -113,10 +115,44 @@ class TestAutomationHelpers:
                 assert ('-BEGIN RENDER-' in output and '-END RENDER-' in output)
 
     def test_deploy_rendered_config(self, nr):
+        """ Test deploy rendered configs to device. """
         result = nr.run(
             task=nornir_deploy_config,
         )
+        # pytest.set_trace()
+        assert not result.failed
+
+    def test_proper_configs_were_pushed_to_device(self, nr):
+        """ Test to ensure configs pushed to device were the same configs rendered in the nornir
+        inventory object under task.host['rendered_config'] in the helpers.render_configs function. """
+
+        result = nr.run(
+            task=napalm_get,
+            getters='get_interfaces',
+        )
         print_result(result)
+
+        for key in nr.inventory.hosts.keys():
+            nr_inventory_uuid = nr.inventory.hosts[key].data['uuid_str']
+            device_uuid = result[key][0].result['get_interfaces']['Loopback1000']['description']
+            assert nr_inventory_uuid == device_uuid
+
+    def test_render_remediation_config(self, nr):
+        """ Test remediation functionality for device. """
+        # TODO: Think of ways to best test this further
+        result = nr.run(
+            task=nornir_render_remediation_config,
+        )
+        assert not result.failed
+
+    def test_deploy_remediation_config(self, nr):
+        """ Test deployment of remediation config to device. """
+        # TODO: Think of ways to best test this further
+        result = nr.run(
+            task=nornir_deploy_remediation_config,
+        )
+        assert not result.failed
+
 
 
 

@@ -14,7 +14,9 @@ logging buffered 32768
 {% include "syslog.j2" %}
 
 {% include "ntp.j2" %}
-
+interface Loopback1000
+ shutdown
+ description {{ uuid }}
 end
 !----------------------------------END RENDER----------------------------------
 
