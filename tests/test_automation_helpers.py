@@ -114,28 +114,13 @@ class TestAutomationHelpers:
                 output = file.read()
                 assert ('-BEGIN RENDER-' in output and '-END RENDER-' in output)
 
-    def test_deploy_rendered_config(self, nr):
-        """ Test deploy rendered configs to device. """
-        result = nr.run(
-            task=nornir_deploy_config,
-        )
-        # pytest.set_trace()
-        assert not result.failed
-
-    def test_proper_configs_were_pushed_to_device(self, nr):
-        """ Test to ensure configs pushed to device were the same configs rendered in the nornir
-        inventory object under task.host['rendered_config'] in the helpers.render_configs function. """
-
-        result = nr.run(
-            task=napalm_get,
-            getters='get_interfaces',
-        )
-        print_result(result)
-
-        for key in nr.inventory.hosts.keys():
-            nr_inventory_uuid = nr.inventory.hosts[key].data['uuid_str']
-            device_uuid = result[key][0].result['get_interfaces']['Loopback1000']['description']
-            assert nr_inventory_uuid == device_uuid
+    # def test_deploy_rendered_config(self, nr):
+    #     """ Test deploy rendered configs to device. """
+    #     result = nr.run(
+    #         task=nornir_deploy_config,
+    #     )
+    #     # pytest.set_trace()
+    #     assert not result.failed
 
     def test_render_remediation_config(self, nr):
         """ Test remediation functionality for device. """
@@ -153,6 +138,20 @@ class TestAutomationHelpers:
         )
         assert not result.failed
 
+    def test_proper_configs_were_pushed_to_device(self, nr):
+        """ Test to ensure configs pushed to device were the same configs rendered in the nornir
+        inventory object under task.host['rendered_config'] in the helpers.render_configs function. """
+
+        result = nr.run(
+            task=napalm_get,
+            getters='get_interfaces',
+        )
+        print_result(result)
+
+        for key in nr.inventory.hosts.keys():
+            nr_inventory_uuid = nr.inventory.hosts[key].data['uuid_str']
+            device_uuid = result[key][0].result['get_interfaces']['Loopback1000']['description']
+            assert nr_inventory_uuid == device_uuid
 
 
 

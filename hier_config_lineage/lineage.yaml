@@ -3,6 +3,8 @@
 - lineage:
     - startswith:
         - ip access-list standard management_server
+        - ip domain
+        - no ip domain
         - ntp
         - no ntp
         - logging
@@ -13,16 +15,14 @@
         - no service password-encryption
         - file prompt
         - no file prompt
-        - ip http server
-        - no ip http server
+        - ip http
+        - no ip http
         - snmp-server
         - no snmp-server
+        - interface Loopback1000
   add_tags: safe_services
 
-#- lineage:
-#    - startswith: ip access-list standard management_server
-#    - startswith: permit
-#  add_tags: safe_services
+
 
 
 
