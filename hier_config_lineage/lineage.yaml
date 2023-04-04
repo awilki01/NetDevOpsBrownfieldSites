@@ -2,6 +2,7 @@
 
 - lineage:
     - startswith:
+        - ip access-list standard management_server
         - ntp
         - no ntp
         - logging
