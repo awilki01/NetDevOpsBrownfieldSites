@@ -1,22 +1,36 @@
-import os, shutil, hashlib, uuid
+"""
+    This module has many functions to assist with network automation tasks
+    and the framework it applies to. The framework assumes there is three
+    directories relative to where the python code is being executed:
+        - remediation_config_changes
+        - rendered_configs
+        - running_configs
+
+    Author: Adam Wilkins
+    Email: awilki01@gmail.com
+"""
+
+import os
+import shutil
+import uuid
 from pathlib import Path
-from nornir import InitNornir
-from nornir.core.filter import F
 from nornir.core.task import Task, Result
-from nornir_utils.plugins.functions import print_result
-from nornir_jinja2.plugins.tasks import template_string, template_file
+from nornir_jinja2.plugins.tasks import template_file
 from nornir_utils.plugins.tasks.files import write_file
 from nornir_napalm.plugins.tasks import napalm_configure, napalm_get
-from nornir_netmiko import netmiko_send_config
 from hier_config import Host
 
 
-# class NetworkConfigUtils:
-#     def __init__(self, task: Task):
-#         self.task = task
-
-
 def del_directory_contents(directory_names: list[str]):
+    """
+    This function deletes all files and directories in the specified directories.
+
+    Args:
+        directory_names (list[str]): A list of directory names to delete.
+
+    Returns:
+        None
+    """
     for name in directory_names:
         for filename in os.listdir(name):
             file_path = os.path.join(name, filename)
@@ -26,37 +40,41 @@ def del_directory_contents(directory_names: list[str]):
                 elif os.path.isdir(file_path):
                     shutil.rmtree(file_path)
             except Exception as e:
-                print('Failed to delete %s. Reason: %s' % (file_path, e))
+                print(f"Failed to delete {file_path}. Reason: {e}]")
 
 
-def remediate(task: Task, tag: str, lineage_filename: str) -> Result:
+def _remediate(task: Task, tag: str, lineage_filename: str) -> Result:
+    """
+    This function remediates a device based on the specified tag.
+
+    Args:
+        task (Task): A Nornir task object.
+        tag (str): The tag to remediate.
+        lineage_filename (str): The filename of the lineage file to be used with
+        hier_config library. See hier_config documentation for details.
+
+    Returns:
+        Result
+    """
     host = Host(hostname=f"{task.host.name}", os="ios")
     host.load_tags_from_file(lineage_filename)
     host.load_running_config_from_file(f"./running_configs/{task.host.name}.cfg")
     host.load_generated_config_from_file(f"./rendered_configs/{task.host.name}.cfg")
-
-    # print(f"{task.host.name}")
-    # print(host.remediation_config_filtered_text(include_tags={tag}, exclude_tags={}))
     changes = host.remediation_config_filtered_text(include_tags={tag}, exclude_tags={})
-    # print(task.host.name)
 
     if changes == "":
         print("No changes")
 
-    # print("---------------------------")
-    # print(changes)
-    # print("---------------------------")
-    cfg_change_path = f"./remediation_config_changes/"
+    cfg_change_path = "./remediation_config_changes/"
     filename = f"{cfg_change_path}{task.host.name}.cfg"
 
     # Check if file exists. If it does, then append a newline to it so appended results
     # are added correctly. If the file does not exist, create it.
     if os.path.isfile(filename):
         # print("FILE EXISTS")
-        with open(filename, "a") as file:
+        with open(filename, "a", encoding="utf-8") as file:
             file.write("\n")
     else:
-        # print("NO FILE EXISTS")
         Path(filename).touch()
 
     if changes != "":
@@ -73,8 +91,17 @@ def remediate(task: Task, tag: str, lineage_filename: str) -> Result:
     )
 
 
-def save_running_config(task: Task) -> Result:
-    cfg_path = f"./running_configs/"
+def _save_running_config(task: Task) -> Result:
+    """
+    This function saves the running configuration of a device.
+
+    Args:
+        task (Task): A Nornir task object.
+
+    Returns:
+        Result
+    """
+    cfg_path = "./running_configs/"
     filename = f"{cfg_path}{task.host.name}.cfg"
 
     running_config = task.run(
@@ -82,7 +109,7 @@ def save_running_config(task: Task) -> Result:
         getters=["get_config"],
     )
 
-    content = running_config[0].result['get_config']['running']
+    content = running_config[0].result["get_config"]["running"]
 
     task.run(
         task=write_file,
@@ -91,21 +118,27 @@ def save_running_config(task: Task) -> Result:
         dry_run=False,
     )
 
-    # print(running_config[0].result['get_config']['running'])
-    # task.host['running_config'] = running_config
-
     return Result(
         host=task.host,
     )
 
 
-def render_configs(task: Task) -> Result:
-    """ This function places rendered config in host's data within the Nornir inventory. It does not save it to file."""
-    template_path = f"./templates"
+def _render_configs(task: Task) -> Result:
+    """This function places rendered config in host's data within the Nornir inventory.
+    It does not save it to a file.
+
+    Args:
+        task (Task): A Nornir task object.
+
+    Returns:
+        Result
+
+    """
+    template_path = "./templates"
     if "ios_lan_switches" in task.host.groups:
-        template = f"/switches/base_config.j2"
+        template = "/switches/base_config.j2"
     else:
-        template = f"/routers/base_config.j2"
+        template = "/routers/base_config.j2"
 
     uuid_str = str(uuid.uuid4())
 
@@ -124,21 +157,30 @@ def render_configs(task: Task) -> Result:
 
     # This adds information to the host data field. We are storing rendered config in
     # data field of host object
-    task.host['rendered_config'] = rendered_config
-    # The uuid value is compared in tests to ensure proper config was pushed. This is done later by comparing
-    # the Loopback1000 description text on the device running-config and the uuid value stored in the nornir
-    # inventory object.
-    task.host['uuid_str'] = uuid_str
+    task.host["rendered_config"] = rendered_config
+    # The uuid value is compared in tests to ensure proper config was pushed. This is done
+    # later by comparing the Loopback1000 description text on the device running-config and
+    # the uuid value stored in the nornir inventory object.
+    task.host["uuid_str"] = uuid_str
 
     return Result(
         host=task.host,
     )
 
 
-def write_rendered_config(task: Task) -> Result:
-    cfg_path = f"./rendered_configs/"
+def _write_rendered_config(task: Task) -> Result:
+    """
+    This function writes the rendered configuration of a device to file.
+
+    Args:
+        task (Task): A Nornir task object.
+
+    Returns:
+        Result.
+    """
+    cfg_path = "./rendered_configs/"
     filename = f"{cfg_path}{task.host.name}.cfg"
-    content = task.host['rendered_config']
+    content = task.host["rendered_config"]
 
     task.run(
         task=write_file,
@@ -147,12 +189,21 @@ def write_rendered_config(task: Task) -> Result:
         dry_run=False,
     )
 
-    return Result(
-        host=task.host
-    )
+    return Result(host=task.host)
 
 
-def deploy_config(task: Task, cfg_path: str) -> Result:
+def _deploy_config(task: Task, cfg_path: str) -> Result:
+    """
+    This function deploys the configuration in defined cfg_path
+    to a network device.
+
+    Args:
+        task (Task): A Nornir task object.
+        cfg_path (str): The path to the configuration file.
+
+    Returns:
+        Result
+    """
     config_file = f"{cfg_path}{task.host.name}.cfg"
 
     # If file is empty do not apply. NAPALM errors out on blank files.
@@ -168,10 +219,18 @@ def deploy_config(task: Task, cfg_path: str) -> Result:
 
 
 def nornir_save_running_config_to_file(task: Task) -> Result:
-    print(f"{task.host.name}---------------------------------")
+    """
+    This function saves the running configuration of a device to a local file.
+
+    Args:
+        task (Task): A Nornir task object.
+
+    Returns:
+        Result
+    """
     task.run(
         name="Save Running Config to Local File",
-        task=save_running_config,
+        task=_save_running_config,
     )
     return Result(
         host=task.host,
@@ -179,10 +238,19 @@ def nornir_save_running_config_to_file(task: Task) -> Result:
 
 
 def nornir_render_config(task: Task) -> Result:
-    print(f"{task.host.name}---------------------------------")
+    """
+    This function renders the configuration of a device and saves it
+    to the Nornir inventory object for that device.
+
+    Args:
+        task (Task): A Nornir task object.
+
+    Returns:
+        Result
+    """
     task.run(
         name="Render Device Configuration to Local File",
-        task=render_configs,
+        task=_render_configs,
     )
     return Result(
         host=task.host,
@@ -190,10 +258,18 @@ def nornir_render_config(task: Task) -> Result:
 
 
 def nornir_write_rendered_config_to_file(task: Task) -> Result:
-    print(f"{task.host.name}---------------------------------")
+    """
+    This function writes the rendered configuration of a device to file.
+
+    Args:
+        task (Task): A Nornir task object.
+
+    Returns:
+        Result
+    """
     task.run(
         name="Write Rendered Config to File",
-        task=write_rendered_config,
+        task=_write_rendered_config,
     )
     return Result(
         host=task.host,
@@ -201,11 +277,19 @@ def nornir_write_rendered_config_to_file(task: Task) -> Result:
 
 
 def nornir_deploy_config(task: Task) -> Result:
-    print(f"{task.host.name}---------------------------------")
+    """
+    This function deploys the configuration saved to file to a device.
+
+    Args:
+        task (Task): A Nornir task object.
+
+    Returns:
+        Result
+    """
     task.run(
         name="Deploy Config to Devices",
-        task=deploy_config,
-        cfg_path=f"rendered_configs/",
+        task=_deploy_config,
+        cfg_path="rendered_configs/",
     )
     return Result(
         host=task.host,
@@ -213,10 +297,18 @@ def nornir_deploy_config(task: Task) -> Result:
 
 
 def nornir_render_remediation_config(task: Task) -> Result:
-    print(f"{task.host.name}---------------------------------")
+    """
+    This function generates remediation configurations.
+
+    Args:
+        task (Task): A Nornir task object.
+
+    Returns:
+        Result
+    """
     lineage_filename = "hier_config_lineage/lineage.yaml"
     task.run(
-        task=remediate,
+        task=_remediate,
         name="Config Remediation Generation for Safe Services",
         tag="safe_services",
         lineage_filename=lineage_filename,
@@ -227,15 +319,20 @@ def nornir_render_remediation_config(task: Task) -> Result:
 
 
 def nornir_deploy_remediation_config(task: Task) -> Result:
-    print(f"{task.host.name}---------------------------------")
+    """
+    This function deploys remediation configurations to devices.
+
+    Args:
+        task (Task): A Nornir task object.
+
+    Returns:
+        Result
+    """
     task.run(
         name="Deploy Remediation Configs to Devices",
-        task=deploy_config,
-        cfg_path=f"./remediation_config_changes/",
+        task=_deploy_config,
+        cfg_path="./remediation_config_changes/",
     )
     return Result(
         host=task.host,
     )
-
-
-

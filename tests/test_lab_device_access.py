@@ -1,5 +1,5 @@
-import pytest
 import socket
+import pytest
 from netmiko import ConnectHandler
 
 lab_device_dict = {
@@ -23,7 +23,7 @@ class TestLabDeviceEnvironment:
     def test_can_ssh_into_devices(self):
         for device in lab_device_dict:
             ssh_connection = ConnectHandler(
-                device_type='cisco_ios',
+                device_type="cisco_ios",
                 ip=device,
                 username="labuser",
                 password="password123",
@@ -31,9 +31,3 @@ class TestLabDeviceEnvironment:
             result = ssh_connection.find_prompt()
             ssh_connection.disconnect()
             assert type(result) is str
-
-
-
-
-
-

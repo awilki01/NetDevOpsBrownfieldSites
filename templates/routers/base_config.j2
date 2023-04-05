@@ -1,7 +1,7 @@
 !---------------------------------BEGIN RENDER---------------------------------
 service password-encryption
 clock timezone {{ timezone }} {{ timezone_offset }} 0
-no ip domain-lookup
+no ip domain lookup
 ip domain name mylab.com
 file prompt quiet
 username labuser privilege 15 secret password123
