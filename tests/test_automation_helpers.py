@@ -150,6 +150,7 @@ class TestAutomationHelpers:
         result = nr.run(
             task=nornir_deploy_remediation_config,
         )
+        print_result(result)
         assert not result.failed
 
     def test_proper_configs_were_pushed_to_device(self, nr):
