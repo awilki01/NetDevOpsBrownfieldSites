@@ -27,7 +27,7 @@ def main():
     )
 
     nr = InitNornir()
-    # nr = nr.filter(name="lab-rtr01")
+    nr = nr.filter(name="lab-rtr01")
 
     nornir_run = nr.run(
         task=nh.nornir_save_running_config_to_file,
