@@ -9,6 +9,7 @@ from netauto_helpers.helpers import (
 )
 from nornir import InitNornir
 from nornir_utils.plugins.functions import print_result
+from nornir.core.filter import F
 
 
 def main():
@@ -33,6 +34,7 @@ def main():
     )
 
     nr = InitNornir()
+    # nr = nr.filter(name="lab-rtr01")
 
     nornir_run = nr.run(
         task=nornir_save_running_config_to_file,
